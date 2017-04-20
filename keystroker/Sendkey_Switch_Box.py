@@ -13,7 +13,7 @@ def start_setup():
     port = input()
 
     if port == "":
-        port = 'COM5'
+        port = 'COM3'
 
     print("BAUDRATE:", end=" ")
     baudrate = input()
@@ -27,7 +27,6 @@ def start_setup():
     print("BAUDRATE:", baudrate)
 
     ser = serial.Serial(port, baudrate)
-    ser.open()
 
     return ser
 
@@ -36,9 +35,6 @@ def sendkey_char(char_in=None):
     if char_in is None:
         print("ERROR: NO INPUT")
         return
-
-    print("Recieved Input:", char_in)
-    print("Printing...")
 
     SendKeys.SendKeys(char_in)
     time.sleep(0.2)
@@ -49,19 +45,32 @@ def serial_read_switch(ser, mapped_keys=None):
         # sets mapped_keys to all lowercase strings
         mapped_keys = set(string.ascii_lowercase)
 
+    mssg = []
+    de_char = None
+
     while True:
-        for line in ser.readline():
-            de_char = line.decode(encoding='UTF-8', errors='strict')
+        for line_p in ser.readline():
 
-            if de_char == "EXIT":
-                print("QUITING SIGNAL SENT: EXITING")
-                return
-
-            elif de_char in mapped_keys:
-                sendkey_char(de_char)
+            if chr(line_p) == "\n":
+                de_char = "".join(mssg)
+                mssg = []
             else:
-                print("ERROR: INCORRECT KEY SENT")
+                mssg.append(chr(line_p))
 
+            if not de_char is None:
+
+                print("RECIEVED:", de_char)
+
+                if de_char == "EXIT":
+                    print("QUITING SIGNAL SENT: EXITING")
+                    return
+
+                elif de_char in mapped_keys:
+                    sendkey_char(de_char)
+                else:
+                    print("ERROR: INCORRECT KEY SENT")
+
+                de_char = None
 
 if __name__ == '__main__':
     ser = start_setup()
