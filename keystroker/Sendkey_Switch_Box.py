@@ -1,7 +1,6 @@
 import SendKeys
 import serial
 import string
-import time
 
 
 def start_setup():
@@ -43,9 +42,9 @@ def sendkey_char(char_in=None):
     if char_in is None:
         print("ERROR: NO INPUT")
         return
+
     print("RECIEVED:", char_in)
     SendKeys.SendKeys(char_in)
-    time.sleep(0.2)
 
 
 def serial_read_switch(ser, mapped_keys=None):
@@ -61,11 +60,12 @@ def serial_read_switch(ser, mapped_keys=None):
 
             if chr(line_p) == "\n":
                 de_char = "".join(mssg)
+                de_char = de_char.strip()
                 mssg = []
             else:
                 mssg.append(chr(line_p))
 
-            if not de_char is None:
+            if de_char is not None:
                 if de_char == "EXIT":
                     print("QUITING SIGNAL SENT: EXITING")
                     return
@@ -73,7 +73,7 @@ def serial_read_switch(ser, mapped_keys=None):
                 elif de_char in mapped_keys:
                     sendkey_char(de_char)
                 else:
-                    print("ERROR: INCORRECT KEY SENT")
+                    print("ERROR: INCORRECT KEY SENT:", de_char)
 
                 de_char = None
 
