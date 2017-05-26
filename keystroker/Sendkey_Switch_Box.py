@@ -1,40 +1,35 @@
 import SendKeys
 import serial
 import string
-
+import argparse
 
 def start_setup():
-    print("\nSTARTING ARDUINO SERIAL KEYSENDER V 1.0\n")
-    print("Input additional port options as needed.\
-    \nLeave blank if you want to run default.\n")
 
-    print("PORT:", end=" ")
-    port = input()
-    if port == "":
-        port = 'COM3'
 
-    print("BAUDRATE:", end=" ")
-    baudrate = input()
-    if baudrate == "":
-        baudrate = 9600
-    else:
-        baudrate = int(baudrate)
+    parser = argparse.ArgumentParser(description="SWITCH BOX KEYSENDER SETUP")
 
-    print("TIMEOUT:", end=" ")
-    timeout_val = input()
-    if timeout_val == "":
-        timeout_val = 0.5
-    else:
-        timeout_val = float(timeout_val)
+    group = parser.add_argument_group(title="Serial communication config")
+    group.add_argument("-p", "--port", help="set the serial port of the arduino",
+                       default='COM3')
+    group.add_argument("-b", "--baudrate", help="set the communication baudrate",
+                       default=9600)
+    group.add_argument("-t", "--timeout", help="set the timeout value for the serial communication",
+                       default=0.5)
 
-    print("\nSelected port settings:")
+    args = parser.parse_args()
+
+    port = args.port
+    baudrate = args.baudrate
+    timeout = args.timeout
+
+    print("Selected port settings:")
     print("PORT:", port)
     print("BAUDRATE:", baudrate)
-    print("TIMEOUT:", timeout_val)
-    print("")
+    print("TIMEOUT:", timeout)
+
 
     ser = serial.Serial(port, baudrate)
-    ser.timeout = timeout_val
+    ser.timeout = timeout
     return ser
 
 
@@ -56,7 +51,10 @@ def serial_read_switch(ser, mapped_keys=None):
     de_char = None
 
     while True:
-        for line_p in ser.readline():
+        # for line in ser.readlines():
+            # mssg = line.strip()
+
+        for line_p in ser.readline():  # TODO SWITCH TO READLINES
 
             if chr(line_p) == "\n":
                 de_char = "".join(mssg)
